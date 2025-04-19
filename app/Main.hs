@@ -10,14 +10,14 @@ import Numeric (readHex)
 import System.Environment (getArgs)
 import System.Exit (exitSuccess, exitFailure)
 
-data JsonValue
-    = JsonObject [(String, JsonValue)]
-    | JsonArray [JsonValue]
-    | JsonString String
-    | JsonNumber Double
-    | JsonBool Bool
-    | JsonNull
-    deriving (Read, Show)
+data JsonValue where
+  JsonObject :: ![(String, JsonValue)] -> JsonValue
+  JsonArray :: ![JsonValue] -> JsonValue
+  JsonString :: String -> JsonValue
+  JsonNumber :: Double -> JsonValue
+  JsonBool :: Bool -> JsonValue
+  JsonNull :: JsonValue
+  deriving (Read, Show)
 
 newtype Parser a where
     Parser :: {runP :: String -> Maybe (String, a)} -> Parser a
@@ -36,6 +36,13 @@ instance Applicative Parser where
 instance Alternative Parser where
     empty = Parser $ const Nothing
     Parser p1 <|> Parser p2 = Parser $ \input -> p1 input <|> p2 input
+
+instance Monad Parser where
+    return = pure
+    p >>= k = Parser $ \input -> do
+        (input', a) <- runP p input
+        runP (k a) input'
+
 
 jsonNull :: Parser JsonValue
 jsonNull = JsonNull <$ stringP "null"
