@@ -1,3 +1,3 @@
-# Haskell Json Parser
+# Haskell JSON Parser
 
-I wrote an example json parser following a simpler model of how recursive parsers are typically implemented.
+A simple parser for my personal web projects
